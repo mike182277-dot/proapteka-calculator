@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ArrowUp, TrendingUp } from 'lucide-react';
+import { ScenarioComparison } from './ScenarioComparison';
 
 interface MarketingEvent {
   id: string;
@@ -36,6 +38,7 @@ export default function Calculator() {
 
   // Маркетинговые события
   const [events, setEvents] = useState<MarketingEvent[]>(MARKETING_EVENTS);
+  const [deepIntegrationLevel, setDeepIntegrationLevel] = useState('1.5');
 
   // Расчеты
   const calculations = useMemo(() => {
@@ -127,235 +130,227 @@ export default function Calculator() {
           <p className="text-slate-400">Расчет ожидаемых бонусов при сотрудничестве с ООО "ПроАптека"</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Inputs */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Basic Parameters */}
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Основные параметры</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-slate-300 mb-2 block">СОЗ в квартал (руб.)</Label>
-                  <Input
-                    type="number"
-                    value={soz}
-                    onChange={(e) => setSoz(Number(e.target.value))}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
+        {/* Main Tabs */}
+        <Tabs defaultValue="calculator" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-800 mb-6">
+            <TabsTrigger value="calculator" className="text-base">Калькулятор</TabsTrigger>
+            <TabsTrigger value="comparison" className="text-base">Сравнение сценариев</TabsTrigger>
+          </TabsList>
 
-                <div>
-                  <Label className="text-slate-300 mb-2 block">Количество месяцев</Label>
-                  <Input
-                    type="number"
-                    value={months}
-                    onChange={(e) => setMonths(Number(e.target.value))}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
+          {/* Calculator Tab */}
+          <TabsContent value="calculator" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Inputs */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Basic Parameters */}
+                <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-6">
+                  <h2 className="text-lg font-semibold text-white mb-4">Основные параметры</h2>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-slate-300 mb-2 block">СОЗ в квартал (руб.)</Label>
+                      <Input
+                        type="number"
+                        value={soz}
+                        onChange={(e) => setSoz(Number(e.target.value))}
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
 
-                <div>
-                  <Label className="text-slate-300 mb-2 block">Количество аптек</Label>
-                  <Input
-                    type="number"
-                    value={pharmacies}
-                    onChange={(e) => setPharmacies(Number(e.target.value))}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
+                    <div>
+                      <Label className="text-slate-300 mb-2 block">Количество месяцев</Label>
+                      <Input
+                        type="number"
+                        value={months}
+                        onChange={(e) => setMonths(Number(e.target.value))}
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-slate-300 mb-2 block">Количество аптек</Label>
+                      <Input
+                        type="number"
+                        value={pharmacies}
+                        onChange={(e) => setPharmacies(Number(e.target.value))}
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Key Metrics */}
+                <Card className="bg-gradient-to-br from-purple-600/20 to-orange-600/20 border-purple-500/30 backdrop-blur-sm p-6">
+                  <h3 className="text-sm font-semibold text-slate-300 mb-4">ИТОГОВЫЕ ПОКАЗАТЕЛИ</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-slate-400 text-sm mb-1">Общий бонус (квартал)</p>
+                      <p className="text-3xl font-bold text-orange-400">
+                        {Math.round(calculations.totalBonus).toLocaleString('ru-RU')} ₽
+                      </p>
+                    </div>
+
+                    <div className="border-t border-slate-700 pt-4">
+                      <p className="text-slate-400 text-sm mb-1">Бонус в месяц</p>
+                      <p className="text-2xl font-bold text-purple-400">
+                        {Math.round(calculations.bonusPerMonth).toLocaleString('ru-RU')} ₽
+                      </p>
+                    </div>
+
+                    <div className="border-t border-slate-700 pt-4">
+                      <p className="text-slate-400 text-sm mb-1">Доля бонуса в СОЗ</p>
+                      <p className="text-2xl font-bold text-cyan-400">
+                        {calculations.bonusPercentage.toFixed(2)}%
+                      </p>
+                    </div>
+
+                    <div className="border-t border-slate-700 pt-4">
+                      <p className="text-slate-400 text-sm mb-1">Доля маркетинга в СОЗ</p>
+                      <p className="text-xl font-bold text-pink-400">
+                        {calculations.totalMarketingShare.toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               </div>
-            </Card>
 
-            {/* Key Metrics */}
-            <Card className="bg-gradient-to-br from-purple-600/20 to-orange-600/20 border-purple-500/30 backdrop-blur-sm p-6">
-              <h3 className="text-sm font-semibold text-slate-300 mb-4">ИТОГОВЫЕ ПОКАЗАТЕЛИ</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <p className="text-slate-400 text-sm mb-1">Общий бонус (квартал)</p>
-                  <p className="text-3xl font-bold text-orange-400">
-                    {Math.round(calculations.totalBonus).toLocaleString('ru-RU')} ₽
-                  </p>
+              {/* Right Column - Visualizations */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Charts */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Bar Chart */}
+                  <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-4">
+                    <h3 className="text-sm font-semibold text-white mb-4">Бонусы по мероприятиям</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                        <XAxis dataKey="name" tick={{ fill: '#cbd5e1', fontSize: 12 }} />
+                        <YAxis tick={{ fill: '#cbd5e1', fontSize: 12 }} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                          labelStyle={{ color: '#f1f5f9' }}
+                        />
+                        <Bar dataKey="bonus" fill="#f97316" radius={[8, 8, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Card>
+
+                  {/* Pie Chart */}
+                  <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-4">
+                    <h3 className="text-sm font-semibold text-white mb-4">Распределение бонусов</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${value.toLocaleString('ru-RU')}`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+                          labelStyle={{ color: '#f1f5f9' }}
+                          formatter={(value) => `${value.toLocaleString('ru-RU')} ₽`}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Card>
                 </div>
 
-                <div className="border-t border-slate-700 pt-4">
-                  <p className="text-slate-400 text-sm mb-1">Бонус в месяц</p>
-                  <p className="text-2xl font-bold text-purple-400">
-                    {Math.round(calculations.bonusPerMonth).toLocaleString('ru-RU')} ₽
-                  </p>
-                </div>
-
-                <div className="border-t border-slate-700 pt-4">
-                  <p className="text-slate-400 text-sm mb-1">Доля бонуса в СОЗ</p>
-                  <p className="text-2xl font-bold text-cyan-400">
-                    {calculations.bonusPercentage.toFixed(2)}%
-                  </p>
-                </div>
-
-                <div className="border-t border-slate-700 pt-4">
-                  <p className="text-slate-400 text-sm mb-1">Доля маркетинга в СОЗ</p>
-                  <p className="text-xl font-bold text-pink-400">
-                    {calculations.totalMarketingShare.toFixed(2)}%
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Right Column - Visualizations */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Bar Chart */}
-              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-4">
-                <h3 className="text-sm font-semibold text-white mb-4">Бонусы по мероприятиям</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="name" tick={{ fill: '#cbd5e1', fontSize: 12 }} />
-                    <YAxis tick={{ fill: '#cbd5e1', fontSize: 12 }} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
-                      labelStyle={{ color: '#f1f5f9' }}
-                    />
-                    <Bar dataKey="bonus" fill="#f97316" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Card>
-
-              {/* Pie Chart */}
-              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-4">
-                <h3 className="text-sm font-semibold text-white mb-4">Распределение бонусов</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) => `${name}: ${value.toLocaleString('ru-RU')}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
-                      labelStyle={{ color: '#f1f5f9' }}
-                      formatter={(value) => `${value.toLocaleString('ru-RU')} ₽`}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Card>
-            </div>
-
-            {/* Events Configuration */}
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Маркетинговые мероприятия</h3>
-              
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {events.map((event) => (
-                  <div key={event.id} className="flex items-center gap-4 p-3 bg-slate-700/30 rounded-lg border border-slate-600/50">
-                    <Switch
-                      checked={event.enabled}
-                      onCheckedChange={() => toggleEvent(event.id)}
-                      className="flex-shrink-0"
-                    />
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{event.name}</p>
-                      
-                      <div className="flex gap-2 mt-2">
-                        <div className="flex-1">
-                          <label className="text-xs text-slate-400">Доля (%)</label>
+                {/* Events Configuration */}
+                <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Маркетинговые мероприятия</h3>
+                  
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {events.map((event) => (
+                      <div key={event.id} className="flex items-center gap-4 p-3 bg-slate-700/30 rounded-lg border border-slate-600/50">
+                        <Switch
+                          checked={event.enabled}
+                          onCheckedChange={() => toggleEvent(event.id)}
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white truncate">{event.name}</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           <Input
                             type="number"
                             value={event.shareOfPurchase}
                             onChange={(e) => updateEventShare(event.id, Number(e.target.value))}
-                            disabled={!event.enabled}
-                            className="h-7 bg-slate-600 border-slate-500 text-white text-xs"
+                            className="w-16 bg-slate-600 border-slate-500 text-white text-xs"
                             step="0.1"
+                            disabled={!event.enabled}
                           />
-                        </div>
-                        
-                        <div className="flex-1">
-                          <label className="text-xs text-slate-400">Доходность (%)</label>
                           <Input
                             type="number"
                             value={event.profitability}
                             onChange={(e) => updateEventProfitability(event.id, Number(e.target.value))}
-                            disabled={!event.enabled}
-                            className="h-7 bg-slate-600 border-slate-500 text-white text-xs"
+                            className="w-16 bg-slate-600 border-slate-500 text-white text-xs"
                             step="0.1"
+                            disabled={!event.enabled}
                           />
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </Card>
+
+                {/* Detailed Breakdown Table */}
+                <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Детальный расчет по мероприятиям</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-700">
+                          <th className="text-left py-2 px-2 text-slate-300">Мероприятие</th>
+                          <th className="text-right py-2 px-2 text-slate-300">Участие</th>
+                          <th className="text-right py-2 px-2 text-slate-300">Сумма (₽)</th>
+                          <th className="text-right py-2 px-2 text-slate-300">Доля закупа (%)</th>
+                          <th className="text-right py-2 px-2 text-slate-300">Доходность (%)</th>
+                          <th className="text-right py-2 px-2 text-slate-300">Бонус (₽)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {calculations.eventCalculations.map((event) => (
+                          <tr key={event.id} className="border-b border-slate-800 hover:bg-slate-700/30">
+                            <td className="py-2 px-2 text-slate-300">{event.name}</td>
+                            <td className="text-right py-2 px-2 text-cyan-400">Да</td>
+                            <td className="text-right py-2 px-2 text-purple-300">{event.purchaseAmount.toLocaleString('ru-RU')}</td>
+                            <td className="text-right py-2 px-2 text-orange-300">{((event.purchaseAmount / calculations.totalSoz) * 100).toFixed(1)}%</td>
+                            <td className="text-right py-2 px-2 text-green-300">{event.profitability.toFixed(1)}%</td>
+                            <td className="text-right py-2 px-2 font-semibold text-yellow-300">{event.bonus.toLocaleString('ru-RU')}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
               </div>
-            </Card>
-          </div>
-        </div>
+            </div>
+          </TabsContent>
 
-        {/* Detailed Results Table */}
-        <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm p-6 mt-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Детальный расчет по мероприятиям</h3>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="text-left py-3 px-4 text-slate-300 font-semibold">Мероприятие</th>
-                  <th className="text-right py-3 px-4 text-slate-300 font-semibold">Сумма закупа (руб.)</th>
-                  <th className="text-right py-3 px-4 text-slate-300 font-semibold">Доходность (%)</th>
-                  <th className="text-right py-3 px-4 text-slate-300 font-semibold">Бонус (руб.)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {calculations.eventCalculations.map((event, idx) => (
-                  <tr key={event.id} className="border-b border-slate-700/50 hover:bg-slate-700/20">
-                    <td className="py-3 px-4 text-slate-300">{event.name}</td>
-                    <td className="text-right py-3 px-4 text-slate-300">
-                      {Math.round(event.purchaseAmount).toLocaleString('ru-RU')}
-                    </td>
-                    <td className="text-right py-3 px-4 text-slate-300">{event.profitability}%</td>
-                    <td className="text-right py-3 px-4 text-orange-400 font-semibold">
-                      {Math.round(event.bonus).toLocaleString('ru-RU')}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="border-t-2 border-slate-600 bg-slate-700/30">
-                  <td className="py-3 px-4 text-white font-semibold">КОМПЛЕКСНОЕ ПИСЬМО (10% от бонуса)</td>
-                  <td className="text-right py-3 px-4 text-slate-300">—</td>
-                  <td className="text-right py-3 px-4 text-slate-300">10%</td>
-                  <td className="text-right py-3 px-4 text-orange-400 font-semibold">
-                    {Math.round(calculations.complexLetterBonus).toLocaleString('ru-RU')}
-                  </td>
-                </tr>
-                <tr className="bg-gradient-to-r from-purple-600/20 to-orange-600/20">
-                  <td className="py-3 px-4 text-white font-bold text-lg">ИТОГО</td>
-                  <td className="text-right py-3 px-4 text-slate-300">—</td>
-                  <td className="text-right py-3 px-4 text-slate-300">—</td>
-                  <td className="text-right py-3 px-4 text-orange-400 font-bold text-lg">
-                    {Math.round(calculations.totalBonus).toLocaleString('ru-RU')}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Card>
-
-        {/* Footer Note */}
-        <div className="mt-6 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
-          <p className="text-xs text-slate-400">
-            * Данный расчет ориентировочный, при участии во всех заявленных мероприятиях. Размеры бонусов и доли мероприятий в обороте аптеки не являются гарантированным и могут отличаться в зависимости от структуры товарооборота конкретной аптеки.
-          </p>
-        </div>
+          {/* Comparison Tab */}
+          <TabsContent value="comparison" className="space-y-6">
+            <ScenarioComparison
+              baselineScenario={{
+                totalBonus: calculations.totalBonus,
+                monthlyBonus: calculations.bonusPerMonth,
+                bonusPercentage: calculations.bonusPercentage,
+                marketingPercentage: calculations.totalMarketingShare,
+              }}
+              deepIntegrationLevel={deepIntegrationLevel}
+              onDeepIntegrationLevelChange={setDeepIntegrationLevel}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
